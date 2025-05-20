@@ -1,1 +1,2 @@
 # FluxGAN
+FluxGAN leverages Generative Adversarial Networks (GANs) to provide a fast, computationally efficient surrogate model for neutron flux predictions in nuclear reactor physics, specifically designed to enhance the use of Monte Carlo simulations like OpenMC. By conditioning the flux generation on fuel enrichment, FluxGAN significantly reduces the computational cost, enabling faster, real-time decision-making without compromising accuracy.
