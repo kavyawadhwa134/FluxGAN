@@ -25,6 +25,66 @@ FluxGAN-Multiphysics is a **high-fidelity** and **ultra-fast** Generative Advers
 
 ---
 
+## What is “Multiphysics” in FluxGAN-Multiphysics?
+
+**Multiphysics** refers to the simultaneous modeling and prediction of multiple, interdependent physical phenomena that occur in nuclear reactors. In the context of nuclear engineering, these typically include:
+
+- **Neutron Transport (Reactor Physics):**  
+  Predicting the neutron flux, which determines the rate of nuclear reactions and energy production.
+- **Fuel Burnup:**  
+  Tracking how much energy has been extracted from the fuel, which affects fuel composition, reactivity, and waste characteristics.
+- **Thermal-Hydraulics:**  
+  Modeling the temperature distribution within the fuel, cladding, and coolant, which is critical for safety, efficiency, and material performance.
+
+### Why is Multiphysics Important?
+
+In real reactors, these phenomena are tightly coupled:
+- The neutron flux affects heat generation.
+- The temperature field affects material properties and, in turn, the neutron flux.
+- Burnup changes the fuel composition, which feeds back into both physics and thermal behavior.
+
+Traditional simulation tools (like OpenMC, MCNP, or coupled codes) solve these physics domains together, but at a high computational cost.
+
+---
+
+## How Does FluxGAN-Multiphysics Address Multiphysics?
+
+**FluxGAN-Multiphysics** is trained on datasets that include all these interrelated quantities:
+- **Inputs/Conditions:** Fuel enrichment, geometry, or other reactor parameters.
+- **Outputs:**
+  - Neutron Flux (n/cm²/s)
+  - Burnup (MWd/kgU)
+  - Fuel Centerline Temperature (K)
+  - Clad Surface Temperature (K)
+  - Coolant Outlet Temperature (K)
+
+The GAN learns the **joint distribution** of these variables, capturing not just their individual behavior, but also their correlations and dependencies.
+
+### Key Advantages:
+- **Joint Prediction:**  
+  Generates all multiphysics quantities in a single forward pass, preserving their physical relationships.
+- **Speed:**  
+  Provides results orders of magnitude faster than running separate, coupled physics codes.
+- **Data-Driven:**  
+  Can be trained on high-fidelity simulation data or experimental results, and generalizes to new scenarios.
+
+---
+
+## Example Use Cases
+
+- **Rapid core design optimization:**  
+  Instantly predict how changes in enrichment or geometry affect both neutronics and thermal-hydraulics.
+- **Uncertainty quantification:**  
+  Generate thousands of multiphysics samples for statistical analysis in seconds.
+- **Data augmentation:**  
+  Create synthetic datasets for training other machine learning models or for use in digital twins.
+
+---
+
+## In Summary
+
+**FluxGAN-Multiphysics** is not just a surrogate for a single physics domain—it is a comprehensive, data-driven model that captures the complex, coupled behavior of real nuclear reactors, enabling fast, accurate, and physically consistent multiphysics predictions.
+
 ## Model Results
 
 | Quantity                    | MAE         | RMSE        | R²        | Accuracy (%) |
