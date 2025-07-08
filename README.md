@@ -1,84 +1,110 @@
-# FluxGAN v3: High-Fidelity Conditional GAN for Nuclear Fuel Cycle Data
+# FluxGAN-Multiphysics
 
-> **FluxGAN v3** is a state-of-the-art, high-fidelity machine learning workflow for generating and predicting nuclear fuel cycle data—specifically neutron Flux and Burnup—conditioned on fuel Enrichment. Built on a Conditional Generative Adversarial Network (cGAN), this project enables:
->
-> - **Accurate surrogate modeling** of complex OpenMC simulations
-> - **Rapid data generation** for new enrichment scenarios
-> - **Point-to-point comparison** with real simulation data
-> - **Seamless integration** into research and engineering pipelines
+FluxGAN-Multiphysics is a Generative Adversarial Network (GAN) designed for the **generation and prediction of multiphysics data in nuclear reactor analysis**. It can generate realistic samples of key reactor parameters, including neutron flux, fuel burnup, and temperature fields, enabling advanced data-driven studies and synthetic dataset creation for nuclear engineering applications.
 
 ---
 
-<p align="center">
-  <img src="https://img.shields.io/badge/GAN-Conditional-blue" alt="Conditional GAN">
-  <img src="https://img.shields.io/badge/Accuracy-High-green" alt="High Accuracy">
-  <img src="https://img.shields.io/badge/Python-3.9+-blue" alt="Python 3.9+">
-  <img src="https://img.shields.io/badge/License-MIT-yellow" alt="MIT License">
-</p>
+## Domain & Application
+
+**FluxGAN-Multiphysics** is tailored for the nuclear engineering domain, specifically for:
+- **Reactor physics and thermal-hydraulics**
+- Generation of synthetic multiphysics datasets
+- Surrogate modeling for reactor core analysis
+- Data augmentation for machine learning in nuclear science
+
+**Predicted/Generated Quantities:**
+- Neutron Flux (n/cm²/s)
+- Burnup (MWd/kgU)
+- Fuel Centerline Temperature (K)
+- Clad Surface Temperature (K)
+- Coolant Outlet Temperature (K)
 
 ---
 
-## ✨ Features
-- **Conditional GAN (cGAN):** Predicts Flux and Burnup for any given enrichment value
-- **High Fidelity:** R² > 0.95 for both Flux and Burnup (see comparison results)
-- **Easy-to-Use Workflow:** Train, generate, and compare with just a few commands
-- **Point-to-Point Analysis:** CSV output for detailed error analysis
-- **Reproducible:** All scripts and data included
+## Model Results
 
-## 🚀 Quick Start
+| Quantity                    | MAE         | RMSE        | R²        | Accuracy (%) |
+|-----------------------------|-------------|-------------|-----------|--------------|
+| Flux (n/cm²/s)              | 0.0492      | 0.1109      | 0.9838    | 99.34%       |
+| Burnup (MWd/kgU)            | 4.71e-10    | 8.34e-10    | 0.9565    | 98.83%       |
+| Fuel Centerline Temp (K)    | 0.522       | 0.902       | 0.9566    | 99.92%       |
+| Clad Surface Temp (K)       | 0.494       | 0.853       | 0.9567    | 99.92%       |
+| Coolant Outlet Temp (K)     | 0.0175      | 0.0303      | 0.9568    | 99.997%      |
 
-1. **Set up the environment**
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
-2. **Train the cGAN**
-   ```bash
-   python code/fluxgan_cgan.py
-   ```
-3. **Generate predictions**
-   ```bash
-   python code/generate_for_enrichment_cgan.py
-   ```
-4. **Compare with real data**
-   ```bash
-   python code/compare_generated_vs_real.py
-   ```
-5. **Create a point-to-point comparison CSV**
-   ```bash
-   python code/point_to_point_comparison.py
-   ```
+- **All R² values > 0.95**: The model explains over 95% of the variance for each quantity.
+- **Very low MAE/RMSE**: Predictions are highly accurate and reliable for scientific use.
 
 ---
 
-## 📂 Files
-| File | Purpose |
-|------|---------|
-| `code/fluxgan_cgan.py` | cGAN training script |
-| `code/generate_for_enrichment_cgan.py` | Generate predictions for 100 enrichment values |
-| `code/compare_generated_vs_real.py` | Compare cGAN predictions to real OpenMC data |
-| `code/point_to_point_comparison.py` | Create a detailed comparison CSV |
-| `code/flux_burnup_dataset.csv` | Training dataset |
-| `Sheet.csv` | Real OpenMC data for comparison |
-| `generated_for_enrichment_cgan.csv` | cGAN predictions |
-| `code/point_to_point_comparison.csv` | Point-to-point comparison results |
+## How to Use
+
+### 1. **Setup**
+- Clone the repository and navigate to the project directory.
+- Create and activate a Python virtual environment:
+  ```bash
+  python3 -m venv .venv
+  source .venv/bin/activate
+  ```
+- Install dependencies:
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+### 2. **Prepare Data**
+- Place your training data in `code/flux_burnup_dataset.csv` (see example format in the repo).
+
+### 3. **Train the Model**
+- To train the cGAN for multiphysics:
+  ```bash
+  python code/fluxgan_cgan.py
+  ```
+- Checkpoints will be saved in `plots/checkpoint/`.
+
+### 4. **Generate Synthetic Samples**
+- After training, generate new samples:
+  ```bash
+  python code/generate_for_enrichment_cgan.py
+  ```
+- Output: `generated_for_enrichment_cgan.csv`
+
+### 5. **Evaluate Model Performance**
+- To evaluate the GAN's accuracy and generate plots:
+  ```bash
+  python code/evaluate_fluxgan.py
+  ```
+- Results and plots will be saved in the `plots/` directory.
+
+### 6. **Compare with Real Data**
+- For detailed comparison and error analysis:
+  ```bash
+  python code/compare_generated_vs_real.py
+  python code/point_to_point_comparison.py
+  ```
+- Outputs: printed metrics and CSVs for pointwise errors.
 
 ---
 
-## 📈 Results (Sample)
-| Metric   | Flux      | Burnup    |
-|----------|-----------|-----------|
-| MAE      | 0.0424    | 4.66e-10  |
-| RMSE     | 0.1127    | 8.36e-10  |
-| R²       | 0.9832    | 0.9564    |
+## Requirements
+- Python 3.8+
+- torch
+- numpy
+- pandas
+- scikit-learn
+- matplotlib
+- seaborn
+- scipy
+
+Install all requirements with:
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
-## 📝 Notes
-- Make sure `code/flux_burnup_dataset.csv` and `Sheet.csv` are present in the repository.
-- All scripts assume you are running from the project root directory.
-- For best results, train the cGAN for several thousand epochs.
+## Citation
+If you use FluxGAN-Multiphysics in your research, please cite this repository and acknowledge the authors.
 
-## 📜 License
-MIT 
+---
+
+## Contact
+For questions, issues, or collaboration, please open an issue or contact [kavyawadhwa134](https://github.com/kavyawadhwa134). 
