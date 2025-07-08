@@ -1,6 +1,15 @@
+import torch
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+# Setup device: prefer MPS (Apple Silicon), then CPU (for future compatibility)
+if torch.backends.mps.is_available():
+    device = torch.device('mps')
+    print('Using Apple Silicon GPU (MPS)')
+else:
+    device = torch.device('cpu')
+    print('Using CPU')
 
 # Load real and generated data
 real_df = pd.read_csv('Sheet.csv')

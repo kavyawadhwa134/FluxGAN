@@ -9,7 +9,13 @@ checkpoint_dir = './plots/checkpoint'
 output_csv = './generated_for_enrichment_cgan.csv'
 noise_dim = 100
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# Setup device: prefer MPS (Apple Silicon), then CPU
+if torch.backends.mps.is_available():
+    device = torch.device('mps')
+    print('Using Apple Silicon GPU (MPS)')
+else:
+    device = torch.device('cpu')
+    print('Using CPU')
 
 # The 100 enrichment values from the interference notebook
 enrichment_values = np.array([
