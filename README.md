@@ -21,36 +21,33 @@ pip install -r requirements.txt
 
 ## How to Run
 
-### 1. Set up the environment
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 2. Train the cGAN
+### 1. Train the cGAN
+Train the conditional GAN using your dataset:
 ```bash
 python code/fluxgan_cgan.py
 ```
 This will train the cGAN and save checkpoints in `plots/checkpoint/`.
 
-### 3. Generate predictions for enrichment values
+### 2. Generate predictions for enrichment values
+After training, generate predictions for the 100 enrichment values:
 ```bash
 python code/generate_for_enrichment_cgan.py
 ```
 This will create `generated_for_enrichment_cgan.csv` with predictions for the 100 enrichment values.
 
-### 4. Compare predictions to real data
+### 3. Compare predictions to real data (Sheet.csv)
+To compare the cGAN predictions to the real OpenMC data:
 ```bash
 python code/compare_generated_vs_real.py
 ```
 This prints MAE, RMSE, and R² for Flux and Burnup.
 
-### 5. Create a point-to-point comparison CSV
+### 4. Create a point-to-point comparison CSV
+For a detailed row-by-row comparison (including errors):
 ```bash
 python code/point_to_point_comparison.py
 ```
-This creates `code/point_to_point_comparison.csv` with detailed row-by-row errors.
+This creates `code/point_to_point_comparison.csv` with detailed errors for each enrichment value.
 
 ## Notes
 - Make sure `code/flux_burnup_dataset.csv` and `Sheet.csv` are present in the repository.
