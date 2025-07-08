@@ -1,117 +1,61 @@
-# FLUXGAN on Binder
+# FluxGAN v3: High-Fidelity Conditional GAN Workflow
 
-This repository is set up to run on Binder for easy access to the improved FLUXGAN model.
+This repository implements a high-fidelity conditional GAN (cGAN) for generating and predicting nuclear fuel cycle data (Flux and Burnup) conditioned on enrichment. The workflow includes training, inference, and point-to-point comparison with real OpenMC data.
 
-## 🚀 Quick Start on Binder
+## Requirements
 
-1. **Click the Binder badge** to launch the environment
-2. **Upload your dataset** `flux_burnup_dataset.csv` to the `code/` directory
-3. **Run training or inference**
-
-## 📁 File Structure
-
+Install dependencies using:
 ```
-FluxGAN/
-├── code/
-│   ├── flux_burnup_dataset.csv    # Your dataset (upload this)
-│   ├── simple_improved_fluxgan.py # Main training script
-│   ├── simple_test.py             # Inference/testing script
-│   └── plots/                     # Results directory
-├── run_training.py                # Binder training runner
-├── run_inference.py               # Binder inference runner
-└── requirements.txt               # Dependencies
+pip install -r requirements.txt
 ```
 
-## 🔧 How to Run
+## Files
+- `code/fluxgan_cgan.py`: cGAN training script
+- `code/generate_for_enrichment_cgan.py`: Generate predictions for 100 enrichment values
+- `code/compare_generated_vs_real.py`: Compare cGAN predictions to real OpenMC data
+- `code/point_to_point_comparison.py`: Create a detailed comparison CSV
+- `code/flux_burnup_dataset.csv`: Training dataset
+- `Sheet.csv`: Real OpenMC data for comparison
+- `generated_for_enrichment_cgan.csv`: cGAN predictions
+- `code/point_to_point_comparison.csv`: Point-to-point comparison results
 
-### **Option 1: Training (Train the Model)**
+## How to Run
+
+### 1. Set up the environment
 ```bash
-python run_training.py
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
-**What it does:**
-- Trains the improved FLUXGAN for 5000 epochs
-- Saves checkpoints every 500 epochs
-- Generates loss plots and logs
-- Takes ~30-60 minutes on Binder
 
-### **Option 2: Inference (Test the Model)**
+### 2. Train the cGAN
 ```bash
-python run_inference.py
+python code/fluxgan_cgan.py
 ```
-**What it does:**
-- Tests the current model (trained or untrained)
-- Generates sample data
-- Creates comparison plots
-- Takes ~2-5 minutes
+This will train the cGAN and save checkpoints in `plots/checkpoint/`.
 
-### **Option 3: Direct Scripts**
+### 3. Generate predictions for enrichment values
 ```bash
-# Training
-python code/simple_improved_fluxgan.py
-
-# Testing
-python code/simple_test.py
+python code/generate_for_enrichment_cgan.py
 ```
+This will create `generated_for_enrichment_cgan.csv` with predictions for the 100 enrichment values.
 
-## 📊 Expected Results
-
-### **Training Output:**
+### 4. Compare predictions to real data
+```bash
+python code/compare_generated_vs_real.py
 ```
-Epoch [0/5000] | D: 0.6881 | G: 0.6997 | F: 0.0000
-Epoch [10/5000] | D: 0.1946 | G: 4.7154 | F: 0.0000
-...
-Epoch [500/5000] | D: 0.1637 | G: 9.2085 | F: 0.0000
-[Checkpoint] Saved at epoch 500
+This prints MAE, RMSE, and R² for Flux and Burnup.
+
+### 5. Create a point-to-point comparison CSV
+```bash
+python code/point_to_point_comparison.py
 ```
+This creates `code/point_to_point_comparison.csv` with detailed row-by-row errors.
 
-### **Inference Output:**
-```
-Generated samples:
-  Enrichment: 47.78 - 52.05
-  Flux: 4.76 - 5.21
-  Burnup: 4.78e-08 - 5.19e-08
-```
+## Notes
+- Make sure `code/flux_burnup_dataset.csv` and `Sheet.csv` are present in the repository.
+- All scripts assume you are running from the project root directory.
+- For best results, train the cGAN for several thousand epochs.
 
-## 📈 Model Improvements
-
-- ✅ **Enhanced Architecture**: Separate output heads for each feature
-- ✅ **Better Training**: AdamW optimizer with learning rate scheduling
-- ✅ **Improved Data**: RobustScaler for outlier handling
-- ✅ **Stability**: Feature matching and gradient clipping
-- ✅ **Monitoring**: Comprehensive logging and checkpointing
-
-## 🎯 Key Features
-
-1. **Training Script**: `simple_improved_fluxgan.py`
-2. **Inference Script**: `simple_test.py`
-3. **Evaluation**: `evaluate_fluxgan.py`
-4. **Clean Testing**: `clean_test.py`
-
-## ⚠️ Important Notes
-
-- **Dataset Required**: Upload `flux_burnup_dataset.csv` to `code/` directory
-- **Training Time**: 30-60 minutes on Binder (CPU)
-- **Memory**: ~2GB RAM required
-- **Results**: Saved in `code/plots/` directory
-
-## 🔍 Troubleshooting
-
-**If training fails:**
-- Check dataset is uploaded correctly
-- Ensure enough memory (restart kernel if needed)
-- Check logs for specific errors
-
-**If inference fails:**
-- Run training first to generate checkpoints
-- Check dataset format matches expected structure
-
-## 📞 Support
-
-For issues or questions:
-1. Check the error logs
-2. Verify dataset format
-3. Restart the Binder environment if needed
-
----
-
-**Happy Training! 🚀** 
+## License
+MIT 
