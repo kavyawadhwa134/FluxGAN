@@ -6,7 +6,6 @@ import pandas as pd
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.preprocessing import MinMaxScaler
 import os
-# from torch.cuda.amp import GradScaler, autocast  # Not used for MPS
 from torch.optim.lr_scheduler import StepLR
 
 # Configuration
@@ -39,22 +38,25 @@ X = data[['Enrichment (%)', 'Flux', 'Burnup']].values
 scaler = MinMaxScaler()
 X_scaled = scaler.fit_transform(X)
 
+# Check for NaNs in data
+assert not np.isnan(X_scaled).any(), "NaN in input data!"
+
 # Save dataset stats for inference
 data_min = scaler.data_min_
 data_max = scaler.data_max_
 
-# Conditional Generator
+# Conditional Generator (no spectral norm)
 class Generator(nn.Module):
     def __init__(self, noise_dim=100, cond_dim=1):
         super().__init__()
         self.net = nn.Sequential(
-            nn.utils.spectral_norm(nn.Linear(noise_dim + cond_dim, 256)),
+            nn.Linear(noise_dim + cond_dim, 256),
             nn.LeakyReLU(0.2),
             nn.LayerNorm(256),
-            nn.utils.spectral_norm(nn.Linear(256, 128)),
+            nn.Linear(256, 128),
             nn.LeakyReLU(0.2),
             nn.LayerNorm(128),
-            nn.utils.spectral_norm(nn.Linear(128, 3)),
+            nn.Linear(128, 3),
             nn.Tanh()
         )
         self.apply(self.init_weights)
@@ -69,20 +71,20 @@ class Generator(nn.Module):
             if m.bias is not None:
                 nn.init.zeros_(m.bias)
 
-# Conditional Discriminator
+# Conditional Discriminator (no spectral norm)
 class Discriminator(nn.Module):
     def __init__(self, cond_dim=1):
         super().__init__()
         self.net = nn.Sequential(
-            nn.utils.spectral_norm(nn.Linear(3 + cond_dim, 256)),
+            nn.Linear(3 + cond_dim, 256),
             nn.LeakyReLU(0.2),
             nn.Dropout(0.1),
             nn.LayerNorm(256),
-            nn.utils.spectral_norm(nn.Linear(256, 128)),
+            nn.Linear(256, 128),
             nn.LeakyReLU(0.2),
             nn.Dropout(0.1),
             nn.LayerNorm(128),
-            nn.utils.spectral_norm(nn.Linear(128, 1))
+            nn.Linear(128, 1)
         )
         self.apply(self.init_weights)
 
@@ -100,9 +102,9 @@ class Discriminator(nn.Module):
 generator = Generator(noise_dim, cond_dim=1).to(device)
 discriminator = Discriminator(cond_dim=1).to(device)
 
-# Optimizers with weight decay and adjusted learning rates
-optimizer_G = optim.Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999), weight_decay=1e-5)
-optimizer_D = optim.Adam(discriminator.parameters(), lr=0.00005, betas=(0.5, 0.999), weight_decay=1e-5)
+# Lower learning rates and set weight_decay=0 for MPS stability
+optimizer_G = optim.Adam(generator.parameters(), lr=0.00005, betas=(0.5, 0.999), weight_decay=0)
+optimizer_D = optim.Adam(discriminator.parameters(), lr=0.00001, betas=(0.5, 0.999), weight_decay=0)
 
 # Learning Rate Scheduler (gentler decay)
 scheduler_G = StepLR(optimizer_G, step_size=1000, gamma=0.8)
@@ -110,9 +112,6 @@ scheduler_D = StepLR(optimizer_D, step_size=1000, gamma=0.8)
 
 # Loss function
 adversarial_loss = nn.BCEWithLogitsLoss()
-
-# No AMP/Mixed Precision for MPS
-# scaler = GradScaler()
 
 def add_instance_noise(data, std=0.01):
     """Add Gaussian noise to data for instance noise regularization."""
@@ -169,8 +168,6 @@ for epoch in range(start_epoch, num_epochs):
 
         # ====== Train Discriminator ======
         optimizer_D.zero_grad(set_to_none=True)
-        # No autocast for MPS
-        # with autocast():
         # --- Label smoothing and label noise ---
         real_labels = torch.full((current_batch_size, 1), 0.9, device=device)
         fake_labels = torch.zeros((current_batch_size, 1), device=device)
@@ -195,16 +192,27 @@ for epoch in range(start_epoch, num_epochs):
         d_loss_fake = adversarial_loss(fake_output, fake_labels)
         d_loss = (d_loss_real + d_loss_fake) / 2
 
+        # Check for NaNs in loss
+        if torch.isnan(d_loss):
+            print('NaN detected in D loss!')
+            break
+
         d_loss.backward()
+        torch.nn.utils.clip_grad_norm_(discriminator.parameters(), max_norm=1.0)
         optimizer_D.step()
 
         # ====== Train Generator (1:1 ratio) ======
         optimizer_G.zero_grad(set_to_none=True)
-        # with autocast():
         gen_labels = torch.ones(current_batch_size, 1, device=device)
         g_output = discriminator(fake_data, cond)
         g_loss = adversarial_loss(g_output, gen_labels)
+
+        if torch.isnan(g_loss):
+            print('NaN detected in G loss!')
+            break
+
         g_loss.backward()
+        torch.nn.utils.clip_grad_norm_(generator.parameters(), max_norm=1.0)
         optimizer_G.step()
 
     # Step the learning rate schedulers
