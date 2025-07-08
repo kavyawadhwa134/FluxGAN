@@ -13,7 +13,7 @@ from torch.optim.lr_scheduler import StepLR
 checkpoint_dir = './plots/checkpoint'
 loss_log_file = './plots/loss_log_cgan.csv'
 checkpoint_interval = 1000
-num_epochs = 30001
+num_epochs = 15001
 batch_size = 512
 noise_dim = 100
 label_flip_rate = 0.05   # 5% label flipping
@@ -30,7 +30,9 @@ if not os.path.exists(loss_log_file):
 
 # Load and preprocess data
 data = pd.read_csv('./code/flux_burnup_dataset.csv')
-X = data[['Enrichment (%)', 'Flux', 'Burnup']].values
+# Use all 6 columns for multiphysics
+feature_cols = ['Enrichment (%)', 'Flux (n/cm²/s)', 'Burnup (MWd/kgU)', 'Fuel Centerline Temp (K)', 'Clad Surface Temp (K)', 'Coolant Outlet Temp (K)']
+X = data[feature_cols].values
 scaler = MinMaxScaler()
 X_scaled = scaler.fit_transform(X)
 
@@ -49,7 +51,7 @@ class Generator(nn.Module):
             nn.utils.spectral_norm(nn.Linear(256, 128)),
             nn.LeakyReLU(0.2),
             nn.LayerNorm(128),
-            nn.utils.spectral_norm(nn.Linear(128, 3)),
+            nn.utils.spectral_norm(nn.Linear(128, 6)),  # 6 outputs for multiphysics
             nn.Tanh()
         )
         self.apply(self.init_weights)
@@ -69,7 +71,7 @@ class Discriminator(nn.Module):
     def __init__(self, cond_dim=1):
         super().__init__()
         self.net = nn.Sequential(
-            nn.utils.spectral_norm(nn.Linear(3 + cond_dim, 256)),
+            nn.utils.spectral_norm(nn.Linear(6 + cond_dim, 256)),  # 6 inputs for multiphysics
             nn.LeakyReLU(0.2),
             nn.Dropout(0.1),
             nn.LayerNorm(256),
@@ -148,7 +150,7 @@ def load_checkpoint():
 
 # Prepare dataset: enrichment as condition, rest as targets
 enrichment = X_scaled[:, 0:1]  # shape (N, 1)
-targets = X_scaled  # shape (N, 3)
+targets = X_scaled  # shape (N, 6)
 dataset = TensorDataset(torch.tensor(targets, dtype=torch.float32), torch.tensor(enrichment, dtype=torch.float32))
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 

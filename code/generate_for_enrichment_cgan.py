@@ -36,7 +36,7 @@ class Generator(nn.Module):
             nn.utils.spectral_norm(nn.Linear(256, 128)),
             nn.LeakyReLU(0.2),
             nn.LayerNorm(128),
-            nn.utils.spectral_norm(nn.Linear(128, 3)),
+            nn.utils.spectral_norm(nn.Linear(128, 6)),  # 6 outputs for multiphysics
             nn.Tanh()
         )
         self.apply(self.init_weights)
@@ -89,13 +89,13 @@ if __name__ == '__main__':
             enrich_tensor = torch.tensor([[enrich_norm]], dtype=torch.float32, device=device)
             z = torch.randn(1, noise_dim, device=device)
             gen_sample = generator(z, enrich_tensor).cpu().numpy()[0]
-            # Denormalize
-            enrich_out = denormalize(gen_sample[0], data_min[0], data_max[0])
-            flux_out = denormalize(gen_sample[1], data_min[1], data_max[1])
-            burnup_out = denormalize(gen_sample[2], data_min[2], data_max[2])
-            results.append([enrich, flux_out, burnup_out])
+            # Denormalize all 6 fields
+            denorm = [denormalize(gen_sample[i], data_min[i], data_max[i]) for i in range(6)]
+            # Use the original enrichment value for the first column
+            denorm[0] = enrich
+            results.append(denorm)
 
-    df = pd.DataFrame(results, columns=pd.Index(['Enrichment (%)', 'Flux', 'Burnup']))
+    df = pd.DataFrame(results, columns=pd.Index(['Enrichment (%)', 'Flux (n/cm²/s)', 'Burnup (MWd/kgU)', 'Fuel Centerline Temp (K)', 'Clad Surface Temp (K)', 'Coolant Outlet Temp (K)']))
     print(df)
     df.to_csv(output_csv, index=False)
     print(f'Generated samples for enrichment values saved to {output_csv}') 
