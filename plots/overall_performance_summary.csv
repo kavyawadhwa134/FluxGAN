@@ -1,0 +1,5 @@
+Metric,Value
+Overall_Physics_Accuracy_%,100.0
+Correlation_R2,0.9087127082515146
+Correlation_MAE,0.14695053887169693
+Mean_Distribution_Error_%,9.042471042940607

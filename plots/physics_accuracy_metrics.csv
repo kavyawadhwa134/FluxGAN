@@ -1,0 +1,8 @@
+Constraint,Accuracy_%
+temperature_ordering_accuracy_%,100.0
+fuel_clad_diff_accuracy_%,100.0
+clad_coolant_diff_accuracy_%,100.0
+enrichment_bounds_accuracy_%,100.0
+flux_bounds_accuracy_%,100.0
+temperature_bounds_accuracy_%,100.0
+burnup_bounds_accuracy_%,100.0
