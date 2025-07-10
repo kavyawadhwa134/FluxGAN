@@ -104,7 +104,7 @@ pip install -r requirements.txt
 
 ### **Running FluxGAN**
 
-#### **1. Generate and Analyze Data (Recommended First Step)**
+#### **1. Generate and Analyze Data (Recommended First Step, If using Loaded Checkpoints)**
 ```bash
 python code/error_accuracy_analysis.py
 ```
@@ -245,29 +245,3 @@ This project represents a significant advancement in nuclear engineering simulat
 
 ---
 
-## 📄 **License and Citation**
-
-This work represents a novel approach to nuclear engineering simulation. When using this code for research or commercial applications, please cite:
-
-```
-FluxGAN: High-Fidelity Multiphysics-Informed Neural Networks for Nuclear Reactor Data Generation
-[Your Name], [Year]
-```
-
----
-
-## 🎉 **Get Started Today**
-
-Experience the future of nuclear engineering simulation:
-
-```bash
-git clone <your-repo-url>
-cd FluxGAN
-python code/error_accuracy_analysis.py
-```
-
-**Join the revolution in nuclear data generation - 5000x faster, 100% physics compliant, industry-leading fidelity.**
-
----
-
-*FluxGAN: Where Physics Meets AI for Nuclear Innovation* 🚀⚛️
