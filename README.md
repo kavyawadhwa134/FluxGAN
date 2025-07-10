@@ -91,7 +91,7 @@ physics_loss = (
 ### **Installation**
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/kavyawadhwa134/FluxGAN.git
 cd FluxGAN
 
 # Create and activate virtual environment
